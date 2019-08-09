@@ -1,0 +1,11 @@
+filebeat.inputs:
+- type: tcp
+  max_message_size: 10MiB
+  host: "0.0.0.0:9000"
+#processors:
+#  - decode_json_fields:
+#      fields: ["message"]
+#output.elasticsearch:
+#  hosts: ["192.168.0.134:9200","192.168.0.134:9201","192.168.0.134:9202"]
+output.logstash:
+  hosts: ["logstash:5044"]

@@ -1,0 +1,89 @@
+version: '3'
+networks:
+  elknet:
+services:
+  elasticsearch1:
+    image: elasticsearch:7.2.0
+    environment:
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - $PWD/es/data1:/usr/share/elasticsearch/data
+      - $PWD/es/es1.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    networks:
+      - elknet
+    hostname: elasticsearch1
+    container_name: elasticsearch1
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    #restart: always
+  elasticsearch2:
+    image: elasticsearch:7.2.0
+    environment:
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - $PWD/es/data2:/usr/share/elasticsearch/data
+      - $PWD/es/es2.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    networks:
+      - elknet
+    hostname: elasticsearch2
+    container_name: elasticsearch2
+    ports:
+      - "9201:9201"
+      - "9301:9301"
+  elasticsearch3:
+    image: elasticsearch:7.2.0
+    environment:
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - $PWD/es/data3:/usr/share/elasticsearch/data
+      - $PWD/es/es3.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    networks:
+      - elknet
+    hostname: elasticsearch3
+    container_name: elasticsearch3
+    ports:
+      - "9202:9202"
+      - "9302:9302"
+  kibana:
+    image: kibana:7.2.0
+    volumes:
+      - $PWD/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch1:9200
+    networks:
+      - elknet
+    hostname: kibana
+    depends_on:
+      - elasticsearch1
+    container_name: kibana
+    ports:
+      - "5601:5601"
+  filebeat:
+      image: store/elastic/filebeat:7.2.0
+      volumes:
+        - $PWD/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      networks:
+      - elknet
+      hostname: filebeat
+      depends_on:
+        - elasticsearch1
+      container_name: filebeat
+      ports:
+      - "9000:9000"
+  logstash:
+    image: logstash:7.2.0
+    environment:
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    volumes:
+      - $PWD/logstash/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - $PWD/logstash/logstash.conf:/etc/logstash/conf.d/logstash.conf
+    networks:
+      - elknet
+    hostname: logstash
+    depends_on:
+      - elasticsearch1
+    container_name: logstash
+    ports:
+      - "5044:5044"
+
